@@ -1,27 +1,39 @@
-"""Plot signal.csv (written by the C program) and save it as signal.png."""
+"""Plot signal.csv (written by the C program) and save it as signal.png.
+
+Each line of the CSV is: time, signal1, signal2, ...
+Every signal column is drawn as its own line on the same plot.
+"""
 
 import csv
 
 import matplotlib.pyplot as plt
 
+LABELS = ["noisy", "filtered", "signal 3", "signal 4"]
 
-def read_signal(path: str) -> tuple[list[float], list[float]]:
+
+def read_signals(path: str) -> tuple[list[float], list[list[float]]]:
     times: list[float] = []
-    values: list[float] = []
+    columns: list[list[float]] = []
     with open(path, newline="") as f:
-        for t, v in csv.reader(f):
-            times.append(float(t))
-            values.append(float(v))
-    return times, values
+        for row in csv.reader(f):
+            times.append(float(row[0]))
+            values = [float(v) for v in row[1:]]
+            if not columns:
+                columns = [[] for _ in values]
+            for column, v in zip(columns, values):
+                column.append(v)
+    return times, columns
 
 
 def main() -> None:
-    times, values = read_signal("signal.csv")
+    times, columns = read_signals("signal.csv")
     plt.figure(figsize=(10, 4))
-    plt.plot(times, values)
+    for label, values in zip(LABELS, columns):
+        plt.plot(times, values, label=label)
     plt.xlabel("time (seconds)")
     plt.ylabel("value")
     plt.grid(True)
+    plt.legend()
     plt.tight_layout()
     plt.savefig("signal.png")
     plt.show()
