@@ -8,7 +8,7 @@ import csv
 
 import matplotlib.pyplot as plt
 
-LABELS = ["noisy", "filtered", "signal 3", "signal 4"]
+LABELS = ["noisy", "moving average", "exponential (EMA)", "high-pass"]
 
 
 def read_signals(path: str) -> tuple[list[float], list[list[float]]]:

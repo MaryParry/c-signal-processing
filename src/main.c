@@ -7,7 +7,8 @@
 #define NUM_SAMPLES 1000 // 1000 samples at 1000 per second = 1 second of signal
 #define FREQ 5.0         // the wave goes up and down 5 times per second (5 Hz)
 #define NOISE 0.3
-#define WINDOW 201
+#define WINDOW 31
+#define ALPHA 0.04
 
 int main(void) {
   FILE *out = fopen("signal.csv", "w");
@@ -41,9 +42,18 @@ int main(void) {
     }
     denoised_wave[i] = sum / count;
   }
+  double ema_wave[NUM_SAMPLES];
+
+  ema_wave[0] = noisy_wave[0];
+
+  for (int i = 1; i < NUM_SAMPLES; i++) {
+    ema_wave[i] = ema_wave[i - 1] + ALPHA * (noisy_wave[i] - ema_wave[i - 1]);
+  }
+
   for (int i = 0; i < NUM_SAMPLES; i++) {
     double t = i / (double)SAMPLE_RATE;
-    fprintf(out, "%f,%f,%f\n", t, noisy_wave[i], denoised_wave[i]);
+    fprintf(out, "%f,%f,%f,%f\n", t, noisy_wave[i], denoised_wave[i],
+            ema_wave[i]);
   }
   fclose(out);
   return 0;
